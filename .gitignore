@@ -1,0 +1,21 @@
+# Ignore the node_modules directory
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Environment variables
+.env
+.cursorrules
+
+# IDE files
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
