@@ -8,6 +8,8 @@ build/
 # Environment variables
 .env
 .cursorrules
+.struct
+.uml
 
 # IDE files
 .vscode/
