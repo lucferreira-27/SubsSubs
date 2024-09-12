@@ -7,13 +7,20 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: '#3498db',
-        secondary: '#2ecc71',
-        accent: '#e74c3c',
-        background: '#ecf0f1',
-        text: '#2c3e50',
+        primary: '#222831',
+        secondary: '#2d4059',
+        accent: '#ff5722',
+        light: '#eeeeee',
+      },
+      backgroundImage: {
+        'gradient-main': 'linear-gradient(45deg, var(--tw-gradient-stops))',
       },
     },
   },
   plugins: [],
+  variants: {
+    extend: {
+      backgroundImage: ['hover', 'focus'],
+    },
+  },
 }
