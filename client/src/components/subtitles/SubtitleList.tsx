@@ -21,7 +21,7 @@ const SubtitleList: React.FC = () => {
     try {
       const [data] = await Promise.all([
         getSubtitles(1, 10, filters),
-        new Promise(resolve => setTimeout(resolve, 250)) // 2-second delay
+        new Promise(resolve => setTimeout(resolve, 250))
       ]);
       setSubtitles(data.results);
     } catch (err) {
@@ -48,31 +48,33 @@ const SubtitleList: React.FC = () => {
   if (error) return <div className="flex justify-center items-center h-screen text-accent">{error}</div>;
 
   return (
-    <div className="bg-gradient-to-br from-primary to-secondary min-h-screen p-6">
+    <div className="bg-gradient-main from-gray-900 via-accent/5 to-gray-800 min-h-screen p-6">
       <div className="max-w-7xl mx-auto">
-        <h2 className="text-3xl font-bold mb-8 text-light">Subtitle Library</h2>
-        <div className="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-xl p-4 mb-8 shadow-lg">
-          <FilterBar filters={filters} onFilterChange={handleFilterChange} />
-          <ActiveFilters filters={filters} onRemoveFilter={removeFilter} />
+        <h2 className="text-4xl font-bold mb-8 text-light">Subtitle Library</h2>
+        <div className="bg-gray-800 bg-opacity-50 backdrop-filter backdrop-blur-lg rounded-3xl p-6 mb-8 shadow-2xl relative overflow-visible z-20">
+          <div className="relative">
+            <FilterBar filters={filters} onFilterChange={handleFilterChange} />
+            <ActiveFilters filters={filters} onRemoveFilter={removeFilter} />
+          </div>
         </div>
         {loading ? (
-          <div className="h-64">
+          <div className="h-64 flex justify-center items-center">
             <LoadingSpinner />
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 relative z-10">
             {subtitles.length > 0 ? (
               subtitles.map((subtitle, index) => (
                 <div
                   key={subtitle._id}
-                  className="animate-fade-in"
+                  className="opacity-0 animate-fade-in-up"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <SubtitleCard subtitle={subtitle} />
                 </div>
               ))
             ) : (
-              <div className="col-span-full text-center text-light opacity-75">
+              <div className="col-span-full text-center text-light opacity-75 text-xl">
                 No subtitles found. Try adjusting your filters.
               </div>
             )}

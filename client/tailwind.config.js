@@ -10,18 +10,29 @@ export default {
         primary: '#222831',
         secondary: '#2d4059',
         accent: '#ff5722',
+        'accent-light': '#ff7a50',
         light: '#eeeeee',
       },
       backgroundImage: {
-        'gradient-main': 'linear-gradient(45deg, var(--tw-gradient-stops))',
+        'gradient-main': 'linear-gradient(to bottom right, var(--tw-gradient-stops))',
       },
       animation: {
-        'card-appear': 'card-appear 0.3s ease-out forwards',
+        'fade-in-scale': 'fadeInScale 0.2s ease-out',
+        'fade-out-scale': 'fadeOutScale 0.2s ease-in',
+        'fade-in-up': 'fadeInUp 0.5s ease-out forwards',
       },
       keyframes: {
-        'card-appear': {
-          '0%': { opacity: '0', transform: 'scale(0.95) translateY(10px)' },
-          '100%': { opacity: '1', transform: 'scale(1) translateY(0)' },
+        fadeInScale: {
+          '0%': { opacity: '0', transform: 'scale(0.95)' },
+          '100%': { opacity: '1', transform: 'scale(1)' },
+        },
+        fadeOutScale: {
+          '0%': { opacity: '1', transform: 'scale(1)' },
+          '100%': { opacity: '0', transform: 'scale(0.95)' },
+        },
+        fadeInUp: {
+          '0%': { opacity: '0', transform: 'translateY(10px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
         },
       },
     },
@@ -30,6 +41,8 @@ export default {
   variants: {
     extend: {
       backgroundImage: ['hover', 'focus'],
+      scale: ['group-hover'],
+      opacity: ['group-hover'],
     },
   },
 }

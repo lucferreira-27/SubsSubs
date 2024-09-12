@@ -5,7 +5,7 @@ import Layout from '../components/layout/Layout';
 const HomePage: React.FC = () => {
   return (
     <Layout>
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-primary to-secondary text-light">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-main from-gray-900 via-accent/5 to-gray-800 text-light">
         <h1 className="text-5xl font-bold mb-8">Welcome to Subtitle Manager</h1>
         <p className="text-xl mb-12 text-center max-w-2xl">
           Easily manage, search, and organize your subtitle collection with our powerful tools.
