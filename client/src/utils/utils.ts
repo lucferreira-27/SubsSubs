@@ -1,3 +1,5 @@
+import { FilterOptions } from './types';
+
 export const createFilterQuery = (filters: FilterOptions): string => {
   const queryParams: string[] = [];
 
@@ -9,12 +11,3 @@ export const createFilterQuery = (filters: FilterOptions): string => {
 
   return queryParams.join('&');
 };
-
-export interface FilterOptions {
-  episode?: number;
-  season?: number;
-  showName?: string;
-  language?: string;
-  filler?: boolean;
-  order?: string;
-}
