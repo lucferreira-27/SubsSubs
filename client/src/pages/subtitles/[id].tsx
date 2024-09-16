@@ -8,6 +8,7 @@ import DialogItem from '../../components/subtitles/DialogItem';
 import TimeRangeDrawer from '../../components/subtitles/TimeRangeDrawer';
 import SubtitleHeader from '../../components/subtitles/SubtitleHeader';
 import { Switch } from '@headlessui/react';
+import { stripFormattingCharacters } from '../../components/subtitles/DialogItem';
 
 interface Dialog {
   _id: string;
@@ -44,6 +45,7 @@ const SubtitleDetailPage: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [activeShortcuts, setActiveShortcuts] = useState({ skipOpening: false, skipEnding: false });
   const [exactMatch, setExactMatch] = useState(false);
+  const [previousExactMatch, setPreviousExactMatch] = useState(false);
 
   const timeToSeconds = useCallback((time: string) => {
     const [hours, minutes, seconds] = time.split(':').map(Number);
@@ -86,9 +88,13 @@ const SubtitleDetailPage: React.FC = () => {
     return subtitle.dialogs
       .filter(dialog => {
         const hasText = dialog.text.trim().length > 0;
+        const plainText = stripFormattingCharacters(dialog.text);
         const matchesSearch = exactMatch
-          ? dialog.text.toLowerCase().split(/\s+/).includes(searchTerm.toLowerCase())
-          : dialog.text.toLowerCase().includes(searchTerm.toLowerCase());
+          ? plainText
+              .split(/[\s,.:;!?"'()[\]{}]+/)
+              .filter(word => word.length > 0)
+              .includes(searchTerm)
+          : plainText.toLowerCase().includes(searchTerm.toLowerCase());
         const dialogStartTime = timeToSeconds(dialog.startTime);
         const dialogEndTime = timeToSeconds(dialog.endTime);
         const matchesTimeRange = dialogStartTime >= timeRange[0] && dialogEndTime <= timeRange[1];
@@ -158,6 +164,25 @@ const SubtitleDetailPage: React.FC = () => {
 
   const dialogsToDisplay = subtitle?.dialogs.length ? filteredAndSortedDialogs : placeholderDialogs;
 
+  const handleSearchTermChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newSearchTerm = e.target.value;
+    setSearchTerm(newSearchTerm);
+
+    if (newSearchTerm === '') {
+      setPreviousExactMatch(exactMatch);
+      setExactMatch(false);
+    } else if (searchTerm === '' && newSearchTerm !== '') {
+      setExactMatch(previousExactMatch);
+    }
+  };
+
+  const handleExactMatchToggle = () => {
+    if (searchTerm !== '') {
+      setExactMatch(!exactMatch);
+      setPreviousExactMatch(!exactMatch);
+    }
+  };
+
   if (loading) return <LoadingSpinner />;
   if (error) return <div className="flex justify-center items-center h-screen text-accent">{error}</div>;
 
@@ -195,10 +220,13 @@ const SubtitleDetailPage: React.FC = () => {
                       <div className="flex items-center space-x-1">
                         <Switch
                           checked={exactMatch}
-                          onChange={setExactMatch}
+                          onChange={handleExactMatchToggle}
+                          disabled={searchTerm === ''}
                           className={`${
                             exactMatch ? 'bg-accent' : 'bg-gray-600'
-                          } relative inline-flex h-4 w-8 items-center rounded-full transition-colors focus:outline-none`}
+                          } relative inline-flex h-4 w-8 items-center rounded-full transition-colors focus:outline-none ${
+                            searchTerm === '' ? 'opacity-50 cursor-not-allowed' : ''
+                          }`}
                         >
                           <span className="sr-only">Exact match</span>
                           <span
@@ -227,7 +255,7 @@ const SubtitleDetailPage: React.FC = () => {
                       type="text"
                       placeholder="Search dialogs..."
                       value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onChange={handleSearchTermChange}
                       className="w-full pl-12 pr-4 py-3 bg-gray-700 text-light rounded-xl focus:outline-none focus:ring-2 focus:ring-accent border border-gray-600"
                     />
                     <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -267,6 +295,7 @@ const SubtitleDetailPage: React.FC = () => {
                       dialog={dialog}
                       index={index}
                       searchTerm={searchTerm}
+                      exactMatch={exactMatch}
                       onCopy={copyToClipboard}
                       copiedId={copiedId}
                     />
