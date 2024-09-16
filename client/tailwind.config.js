@@ -17,11 +17,21 @@ export default {
         'gradient-main': 'linear-gradient(to bottom right, var(--tw-gradient-stops))',
       },
       animation: {
+        'fade-in': 'fadeIn 0.3s ease-out',
+        'fade-out': 'fadeOut 0.3s ease-in',
         'fade-in-scale': 'fadeInScale 0.2s ease-out',
         'fade-out-scale': 'fadeOutScale 0.2s ease-in',
         'fade-in-up': 'fadeInUp 0.5s ease-out forwards',
       },
       keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0', transform: 'translateY(10px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        fadeOut: {
+          '0%': { opacity: '1', transform: 'translateY(0)' },
+          '100%': { opacity: '0', transform: 'translateY(10px)' },
+        },
         fadeInScale: {
           '0%': { opacity: '0', transform: 'scale(0.95)' },
           '100%': { opacity: '1', transform: 'scale(1)' },
@@ -34,6 +44,9 @@ export default {
           '0%': { opacity: '0', transform: 'translateY(10px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
+      },
+      scale: {
+        '102': '1.02',
       },
     },
   },
