@@ -32,6 +32,7 @@
         let direction = { x: 0, y: 0 };
         let food = { x: 15, y: 15 };
         let score = 0;
+        let gameOver = false;
 
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -53,18 +54,23 @@
         }
 
         function update() {
+            if (gameOver) {
+                showGameOver();
+                return;
+            }
+
             const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
 
             // Check for collision with walls
             if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount) {
-                resetGame();
+                gameOver = true;
                 return;
             }
 
             // Check for collision with self
             for (let i = 0; i < snake.length; i++) {
                 if (snake[i].x === head.x && snake[i].y === head.y) {
-                    resetGame();
+                    gameOver = true;
                     return;
                 }
             }
@@ -99,7 +105,21 @@
             snake = [{ x: 10, y: 10 }];
             direction = { x: 0, y: 0 };
             score = 0;
+            gameOver = false;
             placeFood();
+        }
+
+        function showGameOver() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = 'white';
+            ctx.font = '40px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Game Over', canvas.width / 2, canvas.height / 2 - 20);
+
+            ctx.font = '20px Arial';
+            ctx.fillText('Press any key to restart', canvas.width / 2, canvas.height / 2 + 20);
         }
 
         function changeDirection(event) {
@@ -108,6 +128,11 @@
             const goingDown = direction.y === 1;
             const goingRight = direction.x === 1;
             const goingLeft = direction.x === -1;
+
+            if (gameOver) {
+                resetGame();
+                return;
+            }
 
             if (keyPressed === 37 && !goingRight) {
                 direction = { x: -1, y: 0 };
