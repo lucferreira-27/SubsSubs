@@ -2,77 +2,62 @@ const subtitleService = require('../services/subtitleService');
 
 async function createSubtitle(req, res) {
   try {
-    const result = await subtitleService.createSubtitle(req.body);
-    res.status(201).json(result);
+    const subtitle = await subtitleService.createSubtitle(req.body);
+    res.status(201).json(subtitle);
   } catch (error) {
-    console.error('Error creating subtitle:', error);
-    res.status(500).json({ error: 'An error occurred while creating the subtitle' });
+    res.status(500).json({ error: error.message });
   }
 }
 
-async function getSubtitles(req, res, next) {
+async function getSubtitleById(req, res) {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const sortOption = req.query.sort || 'episode';
-    const sortOrder = req.query.order || 'asc';
-    const baseUrl = `${req.baseUrl}`;
-
-    // Parse filter parameters
-    const filter = {};
-    const filterFields = ['episode', 'season', 'showName', 'language', 'filler'];
-    filterFields.forEach(field => {
-      if (req.query[field] !== undefined) {
-        filter[field] = req.query[field];
-      }
-    });
-
-    const result = await subtitleService.getAllSubtitles(page, limit, sortOption, sortOrder, filter, baseUrl);
-
-    res.json(result);
+    const subtitle = await subtitleService.getSubtitleById(req.params.id);
+    if (!subtitle) {
+      return res.status(404).json({ message: 'Subtitle not found' });
+    }
+    res.json(subtitle);
   } catch (error) {
-    next(error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+async function getSubtitlesByEpisodeId(req, res) {
+  try {
+    const subtitles = await subtitleService.getSubtitlesByEpisodeId(req.params.episodeId);
+    res.json(subtitles);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 }
 
 async function updateSubtitle(req, res) {
   try {
-    const result = await subtitleService.updateSubtitle(req.params.id, req.body);
-    res.json(result);
+    const updatedSubtitle = await subtitleService.updateSubtitle(req.params.id, req.body);
+    if (!updatedSubtitle) {
+      return res.status(404).json({ message: 'Subtitle not found' });
+    }
+    res.json(updatedSubtitle);
   } catch (error) {
-    console.error('Error updating subtitle:', error);
-    res.status(500).json({ error: 'An error occurred while updating the subtitle' });
+    res.status(500).json({ error: error.message });
   }
 }
 
 async function deleteSubtitle(req, res) {
   try {
     const result = await subtitleService.deleteSubtitle(req.params.id);
-    res.json(result);
-  } catch (error) {
-    console.error('Error deleting subtitle:', error);
-    res.status(500).json({ error: 'An error occurred while deleting the subtitle' });
-  }
-}
-
-async function getSubtitleWithDialogs(req, res) {
-  try {
-    const result = await subtitleService.getSubtitleWithDialogs(req.params.id);
     if (!result) {
-      res.status(404).json({ message: "Subtitle not found" });
-    } else {
-      res.json(result);
+      return res.status(404).json({ message: 'Subtitle not found' });
     }
+    res.json({ message: 'Subtitle deleted successfully' });
   } catch (error) {
-    console.error('Error getting subtitle with dialogs:', error);
-    res.status(500).json({ error: 'An error occurred while fetching the subtitle with dialogs' });
+    res.status(500).json({ error: error.message });
   }
 }
 
 module.exports = {
   createSubtitle,
-  getSubtitles,
+  getSubtitleById,
+  getSubtitlesByEpisodeId,
   updateSubtitle,
-  deleteSubtitle,
-  getSubtitleWithDialogs
+  deleteSubtitle
 };

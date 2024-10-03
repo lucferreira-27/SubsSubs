@@ -1,43 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const dialogController = require('../controllers/dialogController');
-const { validateDialog } = require('../middleware/inputValidation');
+
+// Move the search route to the top
+router.get('/search-dialogs', dialogController.searchDialogs);
 
 /**
  * @swagger
- * components:
- *   schemas:
- *     Dialog:
- *       type: object
- *       required:
- *         - subtitleId
- *         - text
- *         - startTime
- *         - endTime
- *       properties:
- *         _id:
- *           type: string
- *           description: The auto-generated id of the dialog
- *         subtitleId:
- *           type: string
- *           description: The id of the associated subtitle
- *         text:
- *           type: string
- *           description: The dialog text
- *         startTime:
- *           type: string
- *           description: The start time of the dialog
- *         endTime:
- *           type: string
- *           description: The end time of the dialog
- *         name:
- *           type: string
- *           description: The name of the character speaking (optional)
- */
-
-/**
- * @swagger
- * /dialogs:
+ * /api/dialogs:
  *   post:
  *     summary: Create a new dialog
  *     tags: [Dialogs]
@@ -49,51 +19,71 @@ const { validateDialog } = require('../middleware/inputValidation');
  *             $ref: '#/components/schemas/Dialog'
  *     responses:
  *       201:
- *         description: The created dialog
+ *         description: Created dialog
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Dialog'
- *       400:
- *         description: Invalid input
+ *       500:
+ *         description: Server error
  */
-router.post('/', validateDialog, dialogController.createDialog);
+router.post('/', dialogController.createDialog);
 
 /**
  * @swagger
- * /dialogs:
+ * /api/dialogs/{id}:
  *   get:
- *     summary: Retrieve a list of dialogs
+ *     summary: Get a dialog by ID
  *     tags: [Dialogs]
  *     parameters:
- *       - $ref: '#/components/parameters/pageParam'
- *       - $ref: '#/components/parameters/limitParam'
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
- *         description: A list of dialogs
+ *         description: A dialog object
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 dialogs:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Dialog'
- *                 page:
- *                   type: integer
- *                 limit:
- *                   type: integer
- *                 totalPages:
- *                   type: integer
- *                 totalItems:
- *                   type: integer
+ *               $ref: '#/components/schemas/Dialog'
+ *       404:
+ *         description: Dialog not found
+ *       500:
+ *         description: Server error
  */
-router.get('/', dialogController.getDialogs);
+router.get('/:id', dialogController.getDialogById);
 
 /**
  * @swagger
- * /dialogs/{id}:
+ * /api/dialogs/subtitle/{subtitleId}:
+ *   get:
+ *     summary: Get dialogs by subtitle ID
+ *     tags: [Dialogs]
+ *     parameters:
+ *       - in: path
+ *         name: subtitleId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of dialogs
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Dialog'
+ *       500:
+ *         description: Server error
+ */
+router.get('/subtitle/:subtitleId', dialogController.getDialogsBySubtitleId);
+
+/**
+ * @swagger
+ * /api/dialogs/{id}:
  *   put:
  *     summary: Update a dialog
  *     tags: [Dialogs]
@@ -103,7 +93,6 @@ router.get('/', dialogController.getDialogs);
  *         required: true
  *         schema:
  *           type: string
- *         description: The dialog id
  *     requestBody:
  *       required: true
  *       content:
@@ -112,19 +101,21 @@ router.get('/', dialogController.getDialogs);
  *             $ref: '#/components/schemas/Dialog'
  *     responses:
  *       200:
- *         description: The updated dialog
+ *         description: Updated dialog
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Dialog'
  *       404:
  *         description: Dialog not found
+ *       500:
+ *         description: Server error
  */
-router.put('/:id', validateDialog, dialogController.updateDialog);
+router.put('/:id', dialogController.updateDialog);
 
 /**
  * @swagger
- * /dialogs/{id}:
+ * /api/dialogs/{id}:
  *   delete:
  *     summary: Delete a dialog
  *     tags: [Dialogs]
@@ -134,73 +125,14 @@ router.put('/:id', validateDialog, dialogController.updateDialog);
  *         required: true
  *         schema:
  *           type: string
- *         description: The dialog id
  *     responses:
  *       200:
  *         description: Dialog deleted successfully
  *       404:
  *         description: Dialog not found
+ *       500:
+ *         description: Server error
  */
 router.delete('/:id', dialogController.deleteDialog);
-
-/**
- * @swagger
- * /dialogs/search:
- *   get:
- *     summary: Search for dialogs
- *     tags: [Dialogs]
- *     parameters:
- *       - in: query
- *         name: query
- *         required: true
- *         schema:
- *           type: string
- *         description: The search query
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *         description: The page number for pagination
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 10
- *         description: The number of results per page
- *     responses:
- *       200:
- *         description: Search results
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 metadata:
- *                   type: object
- *                   properties:
- *                     totalResults:
- *                       type: integer
- *                     currentPage:
- *                       type: integer
- *                     totalPages:
- *                       type: integer
- *                 results:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       subtitle:
- *                         $ref: '#/components/schemas/Subtitle'
- *                       dialogs:
- *                         type: array
- *                         items:
- *                           $ref: '#/components/schemas/Dialog'
- *                       matchCount:
- *                         type: integer
- *       400:
- *         description: Invalid input
- */
-router.get('/search', dialogController.searchDialogs);
 
 module.exports = router;

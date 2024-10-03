@@ -1,21 +1,30 @@
 const dialogService = require('../services/dialogService');
+const dialogData = require('../data/dialogData');
 
 async function createDialog(req, res) {
   try {
-    const result = await dialogService.createDialog(req.body);
-    res.status(201).json(result);
+    const dialog = await dialogService.createDialog(req.body);
+    res.status(201).json(dialog);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 }
 
-async function getDialogs(req, res) {
+async function getDialogById(req, res) {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
-    
-    const dialogs = await dialogService.getDialogs({}, limit, skip);
+    const dialog = await dialogService.getDialogById(req.params.id);
+    if (!dialog) {
+      return res.status(404).json({ message: 'Dialog not found' });
+    }
+    res.json(dialog);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+async function getDialogsBySubtitleId(req, res) {
+  try {
+    const dialogs = await dialogService.getDialogsBySubtitleId(req.params.subtitleId);
     res.json(dialogs);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -24,8 +33,11 @@ async function getDialogs(req, res) {
 
 async function updateDialog(req, res) {
   try {
-    const result = await dialogService.updateDialog(req.params.id, req.body);
-    res.json(result);
+    const updatedDialog = await dialogService.updateDialog(req.params.id, req.body);
+    if (!updatedDialog) {
+      return res.status(404).json({ message: 'Dialog not found' });
+    }
+    res.json(updatedDialog);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -34,29 +46,30 @@ async function updateDialog(req, res) {
 async function deleteDialog(req, res) {
   try {
     const result = await dialogService.deleteDialog(req.params.id);
-    res.json(result);
+    if (!result) {
+      return res.status(404).json({ message: 'Dialog not found' });
+    }
+    res.json({ message: 'Dialog deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 }
 
-async function searchDialogs(req, res, next) {
+async function searchDialogs(req, res) {
   try {
-    const { query, page = 1, limit = 10 } = req.query;
-    const baseUrl = `${req.baseUrl}${req.path}`;
-    
-    const result = await dialogService.searchDialogs(query, parseInt(page), parseInt(limit), baseUrl);
-    
-    res.json(result);
+    const { query, page, limit } = req.query;
+    const results = await dialogData.searchDialogs(query, parseInt(page), parseInt(limit));
+    res.json(results);
   } catch (error) {
-    next(error);
+    res.status(500).json({ error: error.message });
   }
 }
 
 module.exports = {
   createDialog,
-  getDialogs,
+  getDialogById,
+  getDialogsBySubtitleId,
   updateDialog,
   deleteDialog,
-  searchDialogs  // Added this line to export the searchDialogs function
+  searchDialogs
 };

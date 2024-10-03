@@ -1,38 +1,52 @@
-const { getDatabase } = require('../config/database');
-const { ObjectId } = require('mongodb');
+const Dialog = require('../models').Dialog;
 
-const dialogsCollection = 'dialogs';
-
-async function createDialog(dialog) {
-  const db = await getDatabase();
-  const collection = db.collection(dialogsCollection);
-  return await collection.insertOne(dialog);
+async function createDialog(dialogData) {
+  const dialog = new Dialog(dialogData);
+  return await dialog.save();
 }
 
-async function readDialogs(query = {}, limit = 0, skip = 0) {
-  const db = await getDatabase();
-  const collection = db.collection(dialogsCollection);
-  return await collection.find(query)
-    .skip(skip)
-    .limit(limit)
-    .toArray();
+async function getDialogById(id) {
+  return await Dialog.findById(id).populate('subtitleId');
 }
 
-async function updateDialog(id, update) {
-  const db = await getDatabase();
-  const collection = db.collection(dialogsCollection);
-  return await collection.updateOne({ _id: new ObjectId(id) }, { $set: update });
+async function getDialogsBySubtitleId(subtitleId) {
+  return await Dialog.find({ subtitleId });
+}
+
+async function updateDialog(id, updateData) {
+  return await Dialog.findByIdAndUpdate(id, updateData, { new: true });
 }
 
 async function deleteDialog(id) {
-  const db = await getDatabase();
-  const collection = db.collection(dialogsCollection);
-  return await collection.deleteOne({ _id: new ObjectId(id) });
+  return await Dialog.findByIdAndDelete(id);
+}
+
+async function searchDialogs(query, page = 1, limit = 10) {
+  const skip = (page - 1) * limit;
+
+  const searchQuery = { $text: { $search: query } };
+  
+  const totalResults = await Dialog.countDocuments(searchQuery);
+  const dialogs = await Dialog.find(searchQuery)
+    .skip(skip)
+    .limit(limit)
+    .populate('subtitleId');
+
+  return {
+    metadata: {
+      total: totalResults,
+      page: page,
+      limit: limit
+    },
+    results: dialogs
+  };
 }
 
 module.exports = {
   createDialog,
-  readDialogs,
+  getDialogById,
+  getDialogsBySubtitleId,
   updateDialog,
-  deleteDialog
+  deleteDialog,
+  searchDialogs
 };
